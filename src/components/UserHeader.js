@@ -4,10 +4,6 @@ import { connect } from "react-redux";
 import { userFetch } from "../actions";
 
 class UserHeader extends React.Component {
-  componentDidMount() {
-    this.props.userFetch(this.props.userId);
-  }
-
   renderedUser() {
     const { user } = this.props;
 

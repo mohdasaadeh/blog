@@ -8,13 +8,21 @@ export const postsFetch = () => async (dispatch) => {
   dispatch({ type: "POSTS_FETCH", payload: response.data });
 };
 
-// The reason behind separating the function and memoizing it like this is
-// because every time the userFetch action creator gets called, its function
-// gets redeclared, and memoize becomes useless because it will see
-// a new function each time and won't be able to memoize it.
-export const userFetch = (id) => (dispatch) => _userFetch(id, dispatch);
-const _userFetch = _.memoize(async (id, dispatch) => {
+export const userFetch = (id) => async (dispatch) => {
   const response = await jsonPlaceholder.get(`/users/${id}`);
 
   dispatch({ type: "USER_FETCH", payload: response.data });
-});
+};
+
+export const fetchPostsAndUsers = () => async (dispatch, getState) => {
+  // We dispatched postsFetch here because when fetchPostsAndUsers action creator
+  // was called, no actual dispatches were made to the reducers because fetchPostsAndUsers
+  // has no dispatches of its own.
+  await dispatch(postsFetch());
+
+  _.chain(getState().posts)
+    .map("userId")
+    .uniq()
+    .forEach((id) => dispatch(userFetch(id)))
+    .value();
+};
